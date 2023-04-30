@@ -18,13 +18,14 @@ pub fn is_prime(n: usize) -> bool {
 // エラトステネスのふるい
 // 1 以上 N 以下の整数が素数かどうかを返す
 #[snippet]
-pub fn eratosthenes_sieve(n: usize) -> Vec<bool> {
+pub fn eratosthenes_sieve(n: usize) -> Vec<usize> {
+    let mut primes = vec![];
     let mut is_prime = vec![true; n + 1];
     is_prime[0] = false;
     is_prime[1] = false;
-
     for i in 2..=n {
         if is_prime[i] {
+            primes.push(i);
             let mut j = i * 2;
             while j <= n {
                 is_prime[j] = false;
@@ -32,7 +33,7 @@ pub fn eratosthenes_sieve(n: usize) -> Vec<bool> {
             }
         }
     }
-    is_prime
+    primes
 }
 
 // 素因数分解
@@ -93,11 +94,17 @@ mod tests {
 
     #[test]
     fn test_eratosthenes_sieve() {
-        let n = 200;
-        let is_prime = eratosthenes_sieve(n);
-        assert!(is_prime[199]);
-        assert!(!is_prime[200]);
-        assert!(!is_prime[1]);
+        let primes_1 = vec![];
+        let primes_2 = vec![2];
+        let primes_10 = vec![2, 3, 5, 7];
+        let primes_20 = vec![2, 3, 5, 7, 11, 13, 17, 19];
+        let primes_30 = vec![2, 3, 5, 7, 11, 13, 17, 19, 23, 29];
+
+        assert_eq!(eratosthenes_sieve(1), primes_1);
+        assert_eq!(eratosthenes_sieve(2), primes_2);
+        assert_eq!(eratosthenes_sieve(10), primes_10);
+        assert_eq!(eratosthenes_sieve(20), primes_20);
+        assert_eq!(eratosthenes_sieve(30), primes_30);
     }
 
     #[test]
