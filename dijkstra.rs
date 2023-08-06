@@ -1,29 +1,27 @@
 use cargo_snippet::snippet;
 
-#[snippet(name = "__dijkstra_struct")]
+#[snippet("dijkstra")]
 #[derive(Debug, Clone, Eq, PartialEq)]
 struct Node {
     vertex: usize,
     cost: usize,
 }
 
-#[snippet(name = "__dijkstra_cmp")]
+#[snippet("dijkstra")]
 impl Ord for Node {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         other.cost.cmp(&self.cost)
     }
 }
 
-#[snippet(name = "__dijkstra_partial_cmp")]
+#[snippet("dijkstra")]
 impl PartialOrd for Node {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
 
-#[snippet(include = "__dijkstra_struct")]
-#[snippet(include = "__dijkstra_cmp")]
-#[snippet(include = "__dijkstra_partial_cmp")]
+#[snippet("dijkstra")]
 pub fn dijkstra(graph: &[Vec<(usize, usize)>], start: usize) -> Vec<usize> {
     let n = graph.len();
     let mut dist = vec![std::usize::MAX; n];

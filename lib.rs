@@ -1,4 +1,5 @@
 pub mod bfs;
+pub mod combination;
 pub mod dfs;
 pub mod dijkstra;
 pub mod doubling;
