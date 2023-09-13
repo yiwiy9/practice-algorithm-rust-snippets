@@ -49,6 +49,24 @@ impl ModComb {
     pub fn homogeneous(&self, n: usize, k: usize) -> usize {
         self.combination(n + k - 1, k)
     }
+
+    // 参考：https://algo-logic.info/combination/
+    // 計算量：O(k)
+    //
+    // 使用可能場面
+    //   * n が巨大; 1 ≤ n ≤ 10^9
+    //   * k がループ可; 1 ≤ k ≤ 10^5
+    //   * pは素数 かつ p > n
+    pub fn large_n_combination(&self, n: usize, k: usize) -> usize {
+        if n < k {
+            return 0;
+        }
+        let mut res = 1;
+        for i in (n - k + 1)..=n {
+            res = res * i % self.modulo;
+        }
+        res * self.finv[k] % self.modulo
+    }
 }
 
 #[cfg(test)]
@@ -86,5 +104,22 @@ mod tests {
         assert_eq!(comb.homogeneous(10, 7), 11440); // 10H7 = 16C7 = 11440
         assert_eq!(comb.homogeneous(6, 0), 1); // 6H0 = 5C0 = 1
         assert_eq!(comb.homogeneous(10, 2), 55); // 10H2 = 11C2 = 55
+    }
+
+    #[test]
+    fn test_large_n_combination() {
+        let modulo = 1_000_000_007;
+        let cap = 200_001; // 1 <= k <= 2 * 10^5
+        let comb = ModComb::new(cap, modulo);
+
+        // This is the same as the regular combination test, but using large_n_combination.
+        assert_eq!(comb.large_n_combination(5, 3), 10);
+        assert_eq!(comb.large_n_combination(10, 7), 120);
+        assert_eq!(comb.large_n_combination(6, 6), 1);
+
+        // Test for cases where n is very large
+        let large_n = 1_000_000_000;
+        assert_eq!(comb.large_n_combination(large_n, 141421), 516595147);
+        assert_eq!(comb.large_n_combination(large_n, 173205), 589953354);
     }
 }
