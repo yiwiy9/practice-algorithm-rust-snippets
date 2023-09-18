@@ -1,0 +1,2 @@
+# Ignore only the root-level .gitkeep used in the parent repository
+/.gitkeep
