@@ -3,6 +3,7 @@ pub mod combination;
 pub mod dfs;
 pub mod dijkstra;
 pub mod doubling;
+pub mod grid_shape;
 pub mod modulo;
 pub mod positional_notation;
 pub mod prime;
