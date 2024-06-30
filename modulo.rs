@@ -6,6 +6,7 @@ pub fn mod_pow(base: usize, exp: usize, modulo: usize) -> usize {
     if exp == 0 {
         return 1;
     }
+    let base = base % modulo;
     let mut result = mod_pow(base * base % modulo, exp / 2, modulo);
     if exp % 2 == 1 {
         result *= base;
@@ -31,6 +32,7 @@ mod tests {
         assert_eq!(mod_pow(10, 0, MOD), 1);
         assert_eq!(mod_pow(10, 3, MOD), 1000);
         assert_eq!(mod_pow(10, 10, MOD), 17556470);
+        assert_eq!(mod_pow(MOD * MOD + 10, 3, MOD), 1000);
     }
 
     #[test]
