@@ -10,4 +10,5 @@ pub mod modulo;
 pub mod positional_notation;
 pub mod prime;
 pub mod sqrt;
+pub mod trie;
 pub mod zero_one_bfs;
