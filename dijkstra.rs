@@ -23,8 +23,9 @@ impl PartialOrd for Node {
 
 #[snippet("dijkstra")]
 pub fn dijkstra(graph: &[Vec<(usize, usize)>], start: usize) -> Vec<usize> {
+    let inf: usize = 1 << 60;
     let n = graph.len();
-    let mut dist = vec![std::usize::MAX; n];
+    let mut dist = vec![inf; n];
     let mut pq = std::collections::BinaryHeap::new();
 
     dist[start] = 0;

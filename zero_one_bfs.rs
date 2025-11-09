@@ -8,7 +8,8 @@ pub fn zero_one_bfs(
     w: usize,
     start: (usize, usize),
 ) -> Vec<Vec<usize>> {
-    let mut dist = vec![vec![std::usize::MAX; w]; h];
+    let inf: usize = 1 << 60;
+    let mut dist = vec![vec![inf; w]; h];
     let mut deque = std::collections::VecDeque::new();
 
     let dx = [1, 0, -1, 0];
