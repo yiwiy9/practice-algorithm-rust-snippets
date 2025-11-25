@@ -11,5 +11,6 @@ pub mod positional_notation;
 pub mod prime;
 pub mod rolling_hash;
 pub mod sqrt;
+pub mod sum_quotients;
 pub mod trie;
 pub mod zero_one_bfs;
