@@ -1,3 +1,4 @@
+pub mod angle_between;
 pub mod bfs;
 pub mod combination;
 pub mod dfs;
@@ -10,6 +11,7 @@ pub mod modulo;
 pub mod positional_notation;
 pub mod prime;
 pub mod rolling_hash;
+pub mod sort_by_argument;
 pub mod sqrt;
 pub mod sum_quotients;
 pub mod trie;
