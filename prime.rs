@@ -1,7 +1,11 @@
 use cargo_snippet::snippet;
 
-// 素数判定
-// 2 ~ sqrt(n)の整数で割れるかだけを見ればよい
+/// 素数判定（素朴）
+///
+/// `2..=√n` の範囲で割り切れるかだけ確認すればよい。
+///
+/// ## 計算量
+/// - `O(√n)`
 #[snippet]
 pub fn is_prime(n: usize) -> bool {
     if n <= 1 {
@@ -15,14 +19,23 @@ pub fn is_prime(n: usize) -> bool {
     true
 }
 
-// エラトステネスのふるい
-// 1 以上 N 以下の整数が素数かどうかを返す
+/// エラトステネスのふるい
+///
+/// `1..=n` の素数を列挙して返す。
+///
+/// ## 計算量
+/// - `O(n log log n)`（典型）
 #[snippet]
 pub fn eratosthenes_sieve(n: usize) -> Vec<usize> {
+    if n < 2 {
+        return vec![];
+    }
+
     let mut primes = vec![];
     let mut is_prime = vec![true; n + 1];
     is_prime[0] = false;
     is_prime[1] = false;
+
     for i in 2..=n {
         if is_prime[i] {
             primes.push(i);
@@ -33,11 +46,56 @@ pub fn eratosthenes_sieve(n: usize) -> Vec<usize> {
             }
         }
     }
+
     primes
 }
 
-// 素因数分解
-// 小さい数字から割り続けていくことがミソ
+/// 素因数分解（素数リスト版）
+///
+/// `primes`（昇順の素数列）でのみ試し割りする。
+/// `p*p > n` で打ち切り、最後に `n!=1` ならそれが残りの素因数。
+///
+/// 典型: `primes = eratosthenes_sieve(√maxA)` を1回作って使い回す。
+///
+/// ## 計算量
+/// - 目安: `O(π(√n) + ω(n))`
+///   - `π(x)` は **x 以下の素数の個数**（prime counting function）
+///   - `ω(n)` は **n の異なる素因数の個数**
+#[snippet]
+pub fn factorize_with_primes(mut n: usize, primes: &[usize]) -> Vec<(usize, usize)> {
+    debug_assert!(n >= 1);
+    let mut factors: Vec<(usize, usize)> = Vec::new();
+
+    for &p in primes {
+        if p * p > n {
+            break;
+        }
+        if n % p != 0 {
+            continue;
+        }
+
+        let mut count = 0;
+        while n % p == 0 {
+            n /= p;
+            count += 1;
+        }
+        factors.push((p, count));
+    }
+
+    if n != 1 {
+        factors.push((n, 1));
+    }
+
+    factors
+}
+
+/// 素因数分解（素朴版）
+///
+/// `2..=√n` を全探索して試し割りする。
+/// 実装は簡単だが、入力が大きい＆回数が多いと重くなりやすい。
+///
+/// ## 計算量
+/// - `O(√n)`
 #[snippet]
 pub fn prime_factors(mut n: usize) -> Vec<(usize, usize)> {
     let mut factors: Vec<(usize, usize)> = Vec::new();
@@ -63,7 +121,13 @@ pub fn prime_factors(mut n: usize) -> Vec<(usize, usize)> {
     factors
 }
 
-// 約数の列挙
+/// 約数の列挙
+///
+/// `i` と `n/i` をペアで拾う。最後にソートして返す。
+///
+/// ## 計算量
+/// - 列挙: `O(√n)`
+/// - ソート: `O(d(n) log d(n))`（`d(n)` は約数個数）
 #[snippet]
 pub fn divisors(n: usize) -> Vec<usize> {
     let mut divisors = Vec::new();
@@ -94,46 +158,41 @@ mod tests {
 
     #[test]
     fn test_eratosthenes_sieve() {
-        let primes_1 = vec![];
-        let primes_2 = vec![2];
-        let primes_10 = vec![2, 3, 5, 7];
-        let primes_20 = vec![2, 3, 5, 7, 11, 13, 17, 19];
-        let primes_30 = vec![2, 3, 5, 7, 11, 13, 17, 19, 23, 29];
-
-        assert_eq!(eratosthenes_sieve(1), primes_1);
-        assert_eq!(eratosthenes_sieve(2), primes_2);
-        assert_eq!(eratosthenes_sieve(10), primes_10);
-        assert_eq!(eratosthenes_sieve(20), primes_20);
-        assert_eq!(eratosthenes_sieve(30), primes_30);
+        assert_eq!(eratosthenes_sieve(1), vec![]);
+        assert_eq!(eratosthenes_sieve(2), vec![2]);
+        assert_eq!(eratosthenes_sieve(10), vec![2, 3, 5, 7]);
+        assert_eq!(eratosthenes_sieve(20), vec![2, 3, 5, 7, 11, 13, 17, 19]);
+        assert_eq!(
+            eratosthenes_sieve(30),
+            vec![2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
+        );
     }
 
     #[test]
     fn test_prime_factors() {
-        let n1 = 60;
-        let result1 = prime_factors(n1);
-        assert_eq!(result1, vec![(2, 2), (3, 1), (5, 1)]);
+        assert_eq!(prime_factors(60), vec![(2, 2), (3, 1), (5, 1)]);
+        assert_eq!(prime_factors(84), vec![(2, 2), (3, 1), (7, 1)]);
+        assert_eq!(prime_factors(101), vec![(101, 1)]);
+    }
 
-        let n2 = 84;
-        let result2 = prime_factors(n2);
-        assert_eq!(result2, vec![(2, 2), (3, 1), (7, 1)]);
-
-        let n3 = 101;
-        let result3 = prime_factors(n3);
-        assert_eq!(result3, vec![(101, 1)]);
+    #[test]
+    fn test_factorize_with_primes() {
+        let primes = eratosthenes_sieve(1_000);
+        assert_eq!(
+            factorize_with_primes(60, &primes),
+            vec![(2, 2), (3, 1), (5, 1)]
+        );
+        assert_eq!(
+            factorize_with_primes(84, &primes),
+            vec![(2, 2), (3, 1), (7, 1)]
+        );
+        assert_eq!(factorize_with_primes(101, &primes), vec![(101, 1)]);
     }
 
     #[test]
     fn test_divisors() {
-        let n1 = 60;
-        let result1 = divisors(n1);
-        assert_eq!(result1, vec![1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60]);
-
-        let n2 = 84;
-        let result2 = divisors(n2);
-        assert_eq!(result2, vec![1, 2, 3, 4, 6, 7, 12, 14, 21, 28, 42, 84]);
-
-        let n3 = 101;
-        let result3 = divisors(n3);
-        assert_eq!(result3, vec![1, 101]);
+        assert_eq!(divisors(60), vec![1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30, 60]);
+        assert_eq!(divisors(84), vec![1, 2, 3, 4, 6, 7, 12, 14, 21, 28, 42, 84]);
+        assert_eq!(divisors(101), vec![1, 101]);
     }
 }
