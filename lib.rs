@@ -15,4 +15,5 @@ pub mod sort_by_argument;
 pub mod sqrt;
 pub mod sum_quotients;
 pub mod trie;
+pub mod tropical_matrix;
 pub mod zero_one_bfs;
