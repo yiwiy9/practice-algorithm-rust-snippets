@@ -7,6 +7,7 @@ pub mod doubling;
 pub mod find_centroid;
 pub mod grid_shape;
 pub mod manacher;
+pub mod mod_matrix;
 pub mod modulo;
 pub mod positional_notation;
 pub mod prime;
