@@ -9,8 +9,13 @@ pub struct ModComb {
 
 #[snippet("ModComb")]
 impl ModComb {
-    // テーブルを作る前処理
-    // a^(-1) ≡ -(p%a)^(-1) * (p/a)   (mod.p)
+    /// テーブルを作る前処理。
+    ///
+    /// `cap` は、通常の `combination(n, k)` では `n < cap`、
+    /// `large_n_combination(n, k)` では `k < cap` を満たすように取る。
+    ///
+    /// 逆元の漸化式:
+    /// `a^(-1) ≡ -(p % a)^(-1) * (p / a) (mod p)`
     pub fn new(cap: usize, modulo: usize) -> Self {
         let mut fac = vec![0; cap];
         let mut finv = vec![0; cap];
@@ -29,14 +34,16 @@ impl ModComb {
         Self { modulo, fac, finv }
     }
 
-    // 二項係数計算
-    // nCk = n!/(k!(n-k)!) = (n!) * (k!)^(-1) * ((n-k))!)^(-1)
-    //
-    // 参考：https://drken1215.hatenablog.com/entry/2018/06/08/210000
-    //
-    // 使用可能場面
-    //   * 1 ≤ k ≤ n ≤ 10^7
-    //   * pは素数 かつ p > n
+    /// 二項係数 `nCk`。
+    ///
+    /// `nCk = n! / (k! (n-k)!)` を、前計算した `fac` と `finv` から `O(1)` で返す。
+    ///
+    /// 使用可能場面:
+    /// - `n < cap`
+    /// - `modulo` は素数
+    /// - `modulo > n`
+    ///
+    /// 参考: <https://drken1215.hatenablog.com/entry/2018/06/08/210000>
     pub fn combination(&self, n: usize, k: usize) -> usize {
         if n < k {
             return 0;
@@ -44,26 +51,38 @@ impl ModComb {
         self.fac[n] * (self.finv[k] * self.finv[n - k] % self.modulo) % self.modulo
     }
 
-    // 重複組合せ
-    // n種類のものから重複を許してk個選ぶ場合の数: nHk = (n+k-1)Ck
+    /// 重複組合せ `nHk`。
+    ///
+    /// `n` 種類のものから重複を許して `k` 個選ぶ場合の数。
+    /// `nHk = (n+k-1)Ck`。
     pub fn homogeneous(&self, n: usize, k: usize) -> usize {
         self.combination(n + k - 1, k)
     }
 
-    // 参考：https://algo-logic.info/combination/
-    // 計算量：O(k)
-    //
-    // 使用可能場面
-    //   * n が巨大; 1 ≤ n ≤ 10^9
-    //   * k がループ可; 1 ≤ k ≤ 10^5
-    //   * pは素数 かつ p > n
+    /// `n` が大きく、`k` が小さいときの二項係数 `nCk`。
+    ///
+    /// 通常の `combination(n, k)` は `fac[n]` が必要なので、`n` の最大値まで
+    /// 階乗テーブルを前計算できる場合に向いている。
+    /// こちらは falling product:
+    ///
+    /// `nCk = n * (n - 1) * ... * (n - k + 1) / k!`
+    ///
+    /// として `k` 個だけ掛けるため、`n` が `10^9` 以上でも `k` が小さければ使える。
+    /// ただし `finv[k]` を使うので、`cap > k` となるように初期化しておくこと。
+    ///
+    /// 計算量: `O(k)`
+    ///
+    /// 使用可能場面:
+    /// - `n` が巨大で、`fac[n]` を前計算できない
+    /// - `k` がループ可能なサイズ
+    /// - `modulo` は素数
     pub fn large_n_combination(&self, n: usize, k: usize) -> usize {
         if n < k {
             return 0;
         }
         let mut res = 1;
         for i in (n - k + 1)..=n {
-            res = res * i % self.modulo;
+            res = res * (i % self.modulo) % self.modulo;
         }
         res * self.finv[k] % self.modulo
     }
@@ -121,5 +140,16 @@ mod tests {
         let large_n = 1_000_000_000;
         assert_eq!(comb.large_n_combination(large_n, 141421), 516595147);
         assert_eq!(comb.large_n_combination(large_n, 173205), 589953354);
+    }
+
+    #[test]
+    fn test_large_n_combination_with_n_larger_than_modulo() {
+        let modulo = 1_000_000_007;
+        let comb = ModComb::new(10, modulo);
+
+        // n may be larger than MOD. Reduce each falling-product factor before
+        // multiplication so res * i does not overflow before the modulo.
+        let n = modulo * 20_000 + modulo - 1;
+        assert_eq!(comb.large_n_combination(n, 2), 1);
     }
 }
